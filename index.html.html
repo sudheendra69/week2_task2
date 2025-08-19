@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TODO App</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .task { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }
+    .filter { margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <h1>TODO List</h1>
+
+  <div class="filter">
+    <label>Filter:</label>
+    <select id="categoryFilter">
+      <option value="All">All</option>
+      <option value="Personal">Personal</option>
+      <option value="Work">Work</option>
+    </select>
+    <button onclick="loadTasks()">Apply</button>
+  </div>
+
+  <div>
+    <h2>Add new Tasks</h2>
+    <input type="text" id="taskText" placeholder="New task..." />
+    <select id="taskCategory">
+      <option value="Personal">Personal</option>
+      <option value="Work">Work</option>
+    </select>
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <h3>Tasks</h3>
+  <div id="taskList"></div>
+
+  <script>
+    async function loadTasks() {
+      const category = document.getElementById('categoryFilter').value;
+      const res = await fetch(`/tasks?category=${category}`);
+      const tasks = await res.json();
+      const container = document.getElementById('taskList');
+      container.innerHTML = '';
+      tasks.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'task';
+        div.textContent = `[${t.category}] ${t.text}`;
+        container.appendChild(div);
+      });
+    }
+
+    async function addTask() {
+      const text = document.getElementById('taskText').value;
+      const category = document.getElementById('taskCategory').value;
+      await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, category })
+      });
+      document.getElementById('taskText').value = '';
+      loadTasks();
+    }
+
+    window.onload = loadTasks;
+  </script>
+</body>
+</html>
